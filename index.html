@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Bitcoin, DollarSign, TrendingUp, Download, RefreshCw } from 'lucide-react';
+import { Calculator, Bitcoin, DollarSign, TrendingUp, Download, RefreshCw, Zap, Shield, Globe, Target, ArrowRight, BarChart3, Wallet, Users, Clock } from 'lucide-react';
 
 const BTCTrancheCalculator = () => {
   const [btcPrice, setBtcPrice] = useState(117699);
@@ -7,35 +7,26 @@ const BTCTrancheCalculator = () => {
   const [customTrancheSize, setCustomTrancheSize] = useState('');
   const [totalTarget, setTotalTarget] = useState(60000);
   const [results, setResults] = useState(null);
+  const [animateCards, setAnimateCards] = useState(false);
 
   // Deal structure constants
-  const TOTAL_DISCOUNT = 7.0; // 7%
-  const NET_BUYER_DISCOUNT = 3.5; // 3.5%
-  const SELLER_MARGIN = 2.0; // 2%
-  const CONSULTANT_FEE = 1.5; // 1.5%
+  const TOTAL_DISCOUNT = 7.0;
+  const NET_BUYER_DISCOUNT = 3.5;
+  const SELLER_MARGIN = 2.0;
+  const CONSULTANT_FEE = 1.5;
 
   const calculateTranche = () => {
     const size = customTrancheSize ? parseFloat(customTrancheSize) : trancheSize;
     
     if (!size || size <= 0 || !btcPrice || btcPrice <= 0) return;
 
-    // Market value calculations
     const marketValue = size * btcPrice;
-    
-    // Price calculations
     const priceAfterDiscount = btcPrice * (1 - NET_BUYER_DISCOUNT / 100);
     const atlantisPays = size * priceAfterDiscount;
-    
-    // Commission calculations
     const consultantCommission = size * btcPrice * (CONSULTANT_FEE / 100);
     const sellerGrossRevenue = size * btcPrice;
     const sellerNetPayout = sellerGrossRevenue - consultantCommission;
-    
-    // Savings calculations
     const atlantisSavings = marketValue - atlantisPays;
-    const sellerProfit = sellerNetPayout - atlantisPays; // This would be the seller's actual margin
-    
-    // Transaction count for full contract
     const transactionsNeeded = Math.ceil(totalTarget / size);
     const totalContractValue = totalTarget * btcPrice;
     const totalAtlantisPays = totalTarget * priceAfterDiscount;
@@ -44,28 +35,16 @@ const BTCTrancheCalculator = () => {
     const totalAtlantisSavings = totalContractValue - totalAtlantisPays;
 
     setResults({
-      // Single tranche
-      size,
-      marketValue,
-      atlantisPays,
-      sellerNetPayout,
-      consultantCommission,
-      atlantisSavings,
-      pricePerBTC: priceAfterDiscount,
-      
-      // Full contract totals
-      transactionsNeeded,
-      totalContractValue,
-      totalAtlantisPays,
-      totalSellerPayout,
-      totalConsultantFees,
-      totalAtlantisSavings,
-      
-      // Percentages for verification
+      size, marketValue, atlantisPays, sellerNetPayout, consultantCommission, atlantisSavings,
+      pricePerBTC: priceAfterDiscount, transactionsNeeded, totalContractValue, totalAtlantisPays,
+      totalSellerPayout, totalConsultantFees, totalAtlantisSavings,
       actualBuyerDiscount: ((marketValue - atlantisPays) / marketValue * 100),
       actualConsultantPercent: (consultantCommission / marketValue * 100),
       sellerNetMargin: ((sellerNetPayout - atlantisPays) / atlantisPays * 100)
     });
+
+    setAnimateCards(true);
+    setTimeout(() => setAnimateCards(false), 600);
   };
 
   useEffect(() => {
@@ -95,28 +74,9 @@ const BTCTrancheCalculator = () => {
       calculationDate: new Date().toISOString(),
       btcPrice: btcPrice,
       trancheSize: results.size,
-      dealStructure: {
-        totalDiscount: TOTAL_DISCOUNT,
-        netBuyerDiscount: NET_BUYER_DISCOUNT,
-        sellerMargin: SELLER_MARGIN,
-        consultantFee: CONSULTANT_FEE
-      },
-      singleTranche: {
-        marketValue: results.marketValue,
-        atlantisPays: results.atlantisPays,
-        sellerNetPayout: results.sellerNetPayout,
-        consultantCommission: results.consultantCommission,
-        atlantisSavings: results.atlantisSavings
-      },
-      fullContract: {
-        totalTarget: totalTarget,
-        transactionsNeeded: results.transactionsNeeded,
-        totalContractValue: results.totalContractValue,
-        totalAtlantisPays: results.totalAtlantisPays,
-        totalSellerPayout: results.totalSellerPayout,
-        totalConsultantFees: results.totalConsultantFees,
-        totalAtlantisSavings: results.totalAtlantisSavings
-      }
+      dealStructure: { totalDiscount: TOTAL_DISCOUNT, netBuyerDiscount: NET_BUYER_DISCOUNT, sellerMargin: SELLER_MARGIN, consultantFee: CONSULTANT_FEE },
+      singleTranche: { marketValue: results.marketValue, atlantisPays: results.atlantisPays, sellerNetPayout: results.sellerNetPayout, consultantCommission: results.consultantCommission, atlantisSavings: results.atlantisSavings },
+      fullContract: { totalTarget: totalTarget, transactionsNeeded: results.transactionsNeeded, totalContractValue: results.totalContractValue, totalAtlantisPays: results.totalAtlantisPays, totalSellerPayout: results.totalSellerPayout, totalConsultantFees: results.totalConsultantFees, totalAtlantisSavings: results.totalAtlantisSavings }
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -131,45 +91,59 @@ const BTCTrancheCalculator = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-      <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Calculator className="h-8 w-8" />
-              <div>
-                <h1 className="text-2xl font-bold">BTC Tranche Deal Calculator</h1>
-                <p className="text-blue-100">Atlantis Group USA Corp - Deal Structure Analysis</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-blue-100">Reference</div>
-              <div className="font-mono text-sm">ATLGRU-60K-12-07-UBS-17025</div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-500"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-2000"></div>
+      </div>
+
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Hero Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-400 to-pink-600 rounded-2xl shadow-2xl mb-6 transform hover:scale-110 transition-all duration-300">
+            <Bitcoin className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-orange-300 bg-clip-text text-transparent mb-4">
+            BTC Tranche Calculator
+          </h1>
+          <p className="text-xl text-gray-300 mb-2">Atlantis Group USA Corp - Premium Deal Analysis Platform</p>
+          <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+            <Shield className="w-4 h-4 text-green-400 mr-2" />
+            <span className="text-sm text-gray-200 font-mono">REF: ATLGRU-60K-12-07-UBS-17025</span>
           </div>
         </div>
 
-        {/* Input Controls */}
-        <div className="p-6 bg-gray-50 border-b">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Bitcoin className="inline h-4 w-4 mr-1" />
+        {/* Input Controls - Glassmorphism Style */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="group">
+              <label className="flex items-center text-sm font-semibold text-gray-200 mb-3">
+                <Bitcoin className="w-4 h-4 mr-2 text-orange-400" />
                 BTC Price (USD)
               </label>
-              <input
-                type="number"
-                value={btcPrice}
-                onChange={(e) => setBtcPrice(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Current BTC price"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  value={btcPrice}
+                  onChange={(e) => setBtcPrice(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
+                  placeholder="Current BTC price"
+                />
+                <DollarSign className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Standard Tranche Size
+
+            <div className="group">
+              <label className="flex items-center text-sm font-semibold text-gray-200 mb-3">
+                <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
+                Standard Tranche
               </label>
               <select
                 value={trancheSize}
@@ -177,130 +151,160 @@ const BTCTrancheCalculator = () => {
                   setTrancheSize(parseInt(e.target.value));
                   setCustomTrancheSize('');
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
               >
                 <option value={4000}>4,000 BTC</option>
                 <option value={5000}>5,000 BTC</option>
                 <option value={6000}>6,000 BTC</option>
               </select>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Custom Tranche Size
+
+            <div className="group">
+              <label className="flex items-center text-sm font-semibold text-gray-200 mb-3">
+                <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                Custom Tranche
               </label>
               <input
                 type="number"
                 value={customTrancheSize}
                 onChange={(e) => setCustomTrancheSize(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
                 placeholder="Custom BTC amount"
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <TrendingUp className="inline h-4 w-4 mr-1" />
+
+            <div className="group">
+              <label className="flex items-center text-sm font-semibold text-gray-200 mb-3">
+                <Target className="w-4 h-4 mr-2 text-purple-400" />
                 Total Target (BTC)
               </label>
               <input
                 type="number"
                 value={totalTarget}
                 onChange={(e) => setTotalTarget(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 group-hover:bg-white/15"
                 placeholder="Total BTC target"
               />
             </div>
           </div>
         </div>
 
-        {/* Deal Structure */}
-        <div className="p-6 bg-blue-50 border-b">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Deal Structure Overview</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 bg-white rounded-lg shadow">
-              <div className="text-sm text-gray-600">Total Discount</div>
-              <div className="text-xl font-bold text-red-600">{TOTAL_DISCOUNT}%</div>
+        {/* Deal Structure Overview - Neon Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { label: "Total Discount", value: `${TOTAL_DISCOUNT}%`, color: "from-red-500 to-pink-600", icon: TrendingUp },
+            { label: "Net Buyer Discount", value: `${NET_BUYER_DISCOUNT}%`, color: "from-blue-500 to-cyan-600", icon: Users },
+            { label: "Seller Margin", value: `${SELLER_MARGIN}%`, color: "from-green-500 to-emerald-600", icon: Wallet },
+            { label: "Consultant Fee", value: `${CONSULTANT_FEE}%`, color: "from-orange-500 to-yellow-600", icon: Globe }
+          ].map((item, index) => (
+            <div key={index} className="group relative">
+              <div className={`absolute inset-0 bg-gradient-to-r ${item.color} rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300`}></div>
+              <div className="relative bg-slate-900/90 backdrop-blur-md rounded-2xl p-6 border border-white/10 transform hover:scale-105 transition-all duration-300">
+                <item.icon className="w-8 h-8 text-white mb-3" />
+                <div className="text-sm text-gray-300 mb-1">{item.label}</div>
+                <div className={`text-2xl font-bold bg-gradient-to-r ${item.color} bg-clip-text text-transparent`}>
+                  {item.value}
+                </div>
+              </div>
             </div>
-            <div className="text-center p-3 bg-white rounded-lg shadow">
-              <div className="text-sm text-gray-600">Net Buyer Discount</div>
-              <div className="text-xl font-bold text-blue-600">{NET_BUYER_DISCOUNT}%</div>
-            </div>
-            <div className="text-center p-3 bg-white rounded-lg shadow">
-              <div className="text-sm text-gray-600">Seller Margin</div>
-              <div className="text-xl font-bold text-green-600">{SELLER_MARGIN}%</div>
-            </div>
-            <div className="text-center p-3 bg-white rounded-lg shadow">
-              <div className="text-sm text-gray-600">Consultant Fee</div>
-              <div className="text-xl font-bold text-orange-600">{CONSULTANT_FEE}%</div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {results && (
           <>
-            {/* Single Tranche Results */}
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  Single Tranche Analysis ({formatBTC(results.size)} BTC)
+            {/* Single Tranche Analysis */}
+            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl mb-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-3xl font-bold text-white flex items-center">
+                  <BarChart3 className="w-8 h-8 mr-3 text-orange-400" />
+                  Single Tranche Analysis
+                  <span className="ml-3 px-4 py-2 bg-gradient-to-r from-orange-500 to-pink-600 rounded-full text-lg">
+                    {formatBTC(results.size)} BTC
+                  </span>
                 </h3>
                 <button
                   onClick={exportData}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="group flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  <Download className="h-4 w-4" />
-                  <span>Export Data</span>
+                  <Download className="w-5 h-5 group-hover:animate-bounce" />
+                  <span className="font-semibold">Export Data</span>
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Market Value</div>
-                  <div className="text-2xl font-bold text-gray-800">{formatCurrency(results.marketValue)}</div>
-                  <div className="text-sm text-gray-500">{formatBTC(results.size)} BTC × {formatCurrency(btcPrice)}</div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Atlantis Pays</div>
-                  <div className="text-2xl font-bold text-green-700">{formatCurrency(results.atlantisPays)}</div>
-                  <div className="text-sm text-gray-500">{formatCurrency(results.pricePerBTC)} per BTC</div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Seller Net Payout</div>
-                  <div className="text-2xl font-bold text-purple-700">{formatCurrency(results.sellerNetPayout)}</div>
-                  <div className="text-sm text-gray-500">After consultant fee</div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Consultant Commission</div>
-                  <div className="text-2xl font-bold text-orange-700">{formatCurrency(results.consultantCommission)}</div>
-                  <div className="text-sm text-gray-500">{CONSULTANT_FEE}% of market value</div>
-                </div>
+                {[
+                  { 
+                    title: "Market Value", 
+                    value: formatCurrency(results.marketValue), 
+                    subtitle: `${formatBTC(results.size)} BTC × ${formatCurrency(btcPrice)}`,
+                    color: "from-blue-400 to-blue-600",
+                    icon: DollarSign
+                  },
+                  { 
+                    title: "Atlantis Pays", 
+                    value: formatCurrency(results.atlantisPays), 
+                    subtitle: `${formatCurrency(results.pricePerBTC)} per BTC`,
+                    color: "from-green-400 to-green-600",
+                    icon: Wallet
+                  },
+                  { 
+                    title: "Seller Net Payout", 
+                    value: formatCurrency(results.sellerNetPayout), 
+                    subtitle: "After consultant fee",
+                    color: "from-purple-400 to-purple-600",
+                    icon: Users
+                  },
+                  { 
+                    title: "Consultant Commission", 
+                    value: formatCurrency(results.consultantCommission), 
+                    subtitle: `${CONSULTANT_FEE}% of market value`,
+                    color: "from-orange-400 to-orange-600",
+                    icon: Globe
+                  }
+                ].map((card, index) => (
+                  <div key={index} className={`group relative ${animateCards ? 'animate-pulse' : ''}`}>
+                    <div className={`absolute inset-0 bg-gradient-to-r ${card.color} rounded-2xl blur opacity-60 group-hover:opacity-80 transition duration-300`}></div>
+                    <div className="relative bg-slate-900/90 backdrop-blur-md rounded-2xl p-6 border border-white/20 transform hover:scale-105 transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <card.icon className="w-8 h-8 text-white" />
+                        <div className={`w-3 h-3 bg-gradient-to-r ${card.color} rounded-full animate-pulse`}></div>
+                      </div>
+                      <div className="text-sm text-gray-300 mb-2">{card.title}</div>
+                      <div className="text-2xl font-bold text-white mb-1">{card.value}</div>
+                      <div className="text-xs text-gray-400">{card.subtitle}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Atlantis Savings</div>
-                  <div className="text-2xl font-bold text-red-700">{formatCurrency(results.atlantisSavings)}</div>
-                  <div className="text-sm text-gray-500">{results.actualBuyerDiscount.toFixed(2)}% discount achieved</div>
+              {/* Flow Visualization */}
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 backdrop-blur-md rounded-2xl p-6 border border-red-500/30">
+                  <div className="flex items-center mb-4">
+                    <TrendingUp className="w-6 h-6 text-red-400 mr-3" />
+                    <h4 className="text-lg font-semibold text-white">Atlantis Savings</h4>
+                  </div>
+                  <div className="text-3xl font-bold text-red-400 mb-2">{formatCurrency(results.atlantisSavings)}</div>
+                  <div className="text-sm text-gray-300">{results.actualBuyerDiscount.toFixed(2)}% discount achieved</div>
                 </div>
-                
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600 mb-1">Payment Flow</div>
-                  <div className="text-sm">
-                    <div className="flex justify-between py-1">
-                      <span>Atlantis → Seller:</span>
-                      <span className="font-semibold">{formatCurrency(results.atlantisPays)}</span>
+
+                <div className="bg-gradient-to-br from-gray-500/20 to-slate-500/20 backdrop-blur-md rounded-2xl p-6 border border-gray-500/30">
+                  <div className="flex items-center mb-4">
+                    <ArrowRight className="w-6 h-6 text-gray-400 mr-3" />
+                    <h4 className="text-lg font-semibold text-white">Payment Flow</h4>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
+                      <span className="text-gray-300">Atlantis → Seller:</span>
+                      <span className="font-semibold text-green-400">{formatCurrency(results.atlantisPays)}</span>
                     </div>
-                    <div className="flex justify-between py-1">
-                      <span>Seller → Consultant:</span>
-                      <span className="font-semibold">{formatCurrency(results.consultantCommission)}</span>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
+                      <span className="text-gray-300">Seller → Consultant:</span>
+                      <span className="font-semibold text-orange-400">{formatCurrency(results.consultantCommission)}</span>
                     </div>
-                    <div className="flex justify-between py-1 border-t">
-                      <span>Seller Net:</span>
-                      <span className="font-semibold text-green-600">{formatCurrency(results.sellerNetPayout)}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-white font-semibold">Seller Net:</span>
+                      <span className="font-bold text-purple-400 text-lg">{formatCurrency(results.sellerNetPayout)}</span>
                     </div>
                   </div>
                 </div>
@@ -308,70 +312,132 @@ const BTCTrancheCalculator = () => {
             </div>
 
             {/* Full Contract Summary */}
-            <div className="p-6 bg-gray-50">
-              <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                Full Contract Summary ({formatBTC(totalTarget)} BTC Target)
+            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl mb-8">
+              <h3 className="text-3xl font-bold text-white mb-8 flex items-center">
+                <Globe className="w-8 h-8 mr-3 text-purple-400" />
+                Full Contract Summary
+                <span className="ml-3 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full text-lg">
+                  {formatBTC(totalTarget)} BTC Target
+                </span>
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Transactions Needed</div>
-                  <div className="text-3xl font-bold text-blue-600">{results.transactionsNeeded}</div>
-                  <div className="text-sm text-gray-500">Daily tranches required</div>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Total Contract Value</div>
-                  <div className="text-2xl font-bold text-gray-800">{formatCurrency(results.totalContractValue)}</div>
-                  <div className="text-sm text-gray-500">Market value of all BTC</div>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Total Atlantis Payment</div>
-                  <div className="text-2xl font-bold text-green-600">{formatCurrency(results.totalAtlantisPays)}</div>
-                  <div className="text-sm text-gray-500">Total buyer payment</div>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Total Seller Payout</div>
-                  <div className="text-2xl font-bold text-purple-600">{formatCurrency(results.totalSellerPayout)}</div>
-                  <div className="text-sm text-gray-500">After all consultant fees</div>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Total Consultant Fees</div>
-                  <div className="text-2xl font-bold text-orange-600">{formatCurrency(results.totalConsultantFees)}</div>
-                  <div className="text-sm text-gray-500">Zampolli group earnings</div>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 mb-1">Total Atlantis Savings</div>
-                  <div className="text-2xl font-bold text-red-600">{formatCurrency(results.totalAtlantisSavings)}</div>
-                  <div className="text-sm text-gray-500">vs market price</div>
-                </div>
+                {[
+                  { 
+                    title: "Transactions Needed", 
+                    value: results.transactionsNeeded, 
+                    subtitle: "Daily tranches required",
+                    color: "from-blue-400 to-blue-600",
+                    icon: Clock,
+                    isNumber: true
+                  },
+                  { 
+                    title: "Total Contract Value", 
+                    value: formatCurrency(results.totalContractValue), 
+                    subtitle: "Market value of all BTC",
+                    color: "from-gray-400 to-gray-600",
+                    icon: DollarSign
+                  },
+                  { 
+                    title: "Total Atlantis Payment", 
+                    value: formatCurrency(results.totalAtlantisPays), 
+                    subtitle: "Total buyer payment",
+                    color: "from-green-400 to-green-600",
+                    icon: Wallet
+                  },
+                  { 
+                    title: "Total Seller Payout", 
+                    value: formatCurrency(results.totalSellerPayout), 
+                    subtitle: "After all consultant fees",
+                    color: "from-purple-400 to-purple-600",
+                    icon: Users
+                  },
+                  { 
+                    title: "Total Consultant Fees", 
+                    value: formatCurrency(results.totalConsultantFees), 
+                    subtitle: "Zampolli group earnings",
+                    color: "from-orange-400 to-orange-600",
+                    icon: Globe
+                  },
+                  { 
+                    title: "Total Atlantis Savings", 
+                    value: formatCurrency(results.totalAtlantisSavings), 
+                    subtitle: "vs market price",
+                    color: "from-red-400 to-red-600",
+                    icon: TrendingUp
+                  }
+                ].map((card, index) => (
+                  <div key={index} className="group relative">
+                    <div className={`absolute inset-0 bg-gradient-to-r ${card.color} rounded-2xl blur opacity-60 group-hover:opacity-80 transition duration-300`}></div>
+                    <div className="relative bg-slate-900/90 backdrop-blur-md rounded-2xl p-6 border border-white/20 transform hover:scale-105 transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <card.icon className="w-8 h-8 text-white" />
+                        <div className={`w-3 h-3 bg-gradient-to-r ${card.color} rounded-full animate-pulse`}></div>
+                      </div>
+                      <div className="text-sm text-gray-300 mb-2">{card.title}</div>
+                      <div className={`${card.isNumber ? 'text-4xl' : 'text-2xl'} font-bold text-white mb-1`}>
+                        {card.value}
+                      </div>
+                      <div className="text-xs text-gray-400">{card.subtitle}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Key Terms Reference */}
-            <div className="p-6 bg-blue-900 text-white">
-              <h3 className="text-lg font-semibold mb-4">Key Deal Terms Reference</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                <div>
-                  <h4 className="font-semibold mb-2">Transaction Process:</h4>
-                  <ul className="space-y-1 text-blue-100">
-                    <li>• Initial test: 1 BTC + €100K security</li>
-                    <li>• Daily tranches: 4,000-6,000 BTC</li>
-                    <li>• Settlement: Face-to-face at UBS Zurich</li>
-                    <li>• Payment: EURO/USDT/FIAT combination</li>
+            <div className="bg-gradient-to-r from-slate-800/90 to-purple-900/90 backdrop-blur-md rounded-3xl p-8 border border-purple-500/30 shadow-2xl">
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                <Shield className="w-7 h-7 mr-3 text-green-400" />
+                Key Deal Terms Reference
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg text-purple-300 flex items-center">
+                    <Clock className="w-5 h-5 mr-2" />
+                    Transaction Process:
+                  </h4>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full mr-3"></div>
+                      Initial test: 1 BTC + €100K security
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                      Daily tranches: 4,000-6,000 BTC
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                      Settlement: Face-to-face at UBS Zurich
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                      Payment: EURO/USDT/FIAT combination
+                    </li>
                   </ul>
                 </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Compliance Requirements:</h4>
-                  <ul className="space-y-1 text-blue-100">
-                    <li>• Wallet KYC/AML verification</li>
-                    <li>• Clean wallet (min 2,000 BTC, &lt;100 txs)</li>
-                    <li>• SPA, IMFPA, NCNDA execution</li>
-                    <li>• Mandate authorization (valid until 2025)</li>
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-lg text-purple-300 flex items-center">
+                    <Shield className="w-5 h-5 mr-2" />
+                    Compliance Requirements:
+                  </h4>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
+                      Wallet KYC/AML verification
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-red-400 rounded-full mr-3"></div>
+                      Clean wallet (min 2,000 BTC, &lt;100 txs)
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                      SPA, IMFPA, NCNDA execution
+                    </li>
+                    <li className="flex items-center">
+                      <div className="w-2 h-2 bg-pink-400 rounded-full mr-3"></div>
+                      Mandate authorization (valid until 2025)
+                    </li>
                   </ul>
                 </div>
               </div>
